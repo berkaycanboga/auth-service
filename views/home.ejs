@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home Page</title>
+  </head>
+  <body>
+    <h1>Welcome to your Home Page</h1>
+    <p>Hello, <%= username %>!</p>
+
+    <h2>Update Password</h2>
+    <form action="/home/update/<%= username %>" method="POST">
+      <label for="newPassword">New Password:</label>
+      <input type="password" id="newPassword" name="newPassword" required />
+      <button type="submit">Update Password</button>
+    </form>
+
+    <h2>Delete Account</h2>
+    <form action="/home/delete/<%= username %>" method="POST">
+      <button type="submit">Delete Account</button>
+    </form>
+    <a href="/logout">Logout</a>
+  </body>
+</html>
