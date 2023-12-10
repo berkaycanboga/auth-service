@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import connection from '../db';
 import bcrypt from 'bcrypt';
+import { clearToken } from './authMiddleware';
 
 const getUserByUsername = (username: string): Promise<any> => {
   return new Promise((resolve, reject) => {
@@ -75,8 +76,8 @@ const deleteUser = async (req: Request, res: Response) => {
           console.error('Error during delete:', err);
           return res.status(500).json({ error: 'Error during delete' });
         }
-
-        res.json({ message: 'User deleted successfully' });
+        clearToken(res);
+        res.redirect('/');
       }
     );
   } catch (error) {

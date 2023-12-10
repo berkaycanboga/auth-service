@@ -24,6 +24,10 @@ const clearToken = (res: any) => {
 const authenticateUser = (req: any, res: any, next: Function) => {
   const token = req.cookies.token;
 
+  if (req.path === '/login' || req.path === '/signup') {
+    return next();
+  }
+
   if (!token || !verifyToken(token)) {
     return res.redirect('/');
   }
