@@ -17,11 +17,11 @@
     "strict": true,
     "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": true
+    "skipLibCheck": false
   },
   "include": [
-    "./src/**/*.tsx",
-    "./src/**/*.ts",
+    "**/*.tsx",
+    "**/*.ts",
     "db.ts",
     "routes/authRoutes.ts",
     "routes/homeRoutes.ts"

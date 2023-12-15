@@ -1,8 +1,8 @@
-import express, { Request, Response } from 'express';
-import { createToken, clearToken } from './authMiddleware';
+import { Request, Response } from 'express';
 import connection from '../db';
-import getUserByUsername from './getUserByUsername';
 import bcrypt from 'bcrypt';
+import { clearToken, createToken } from '../middlewares/authMiddleware';
+import { getUserByIdOrUsername } from '../helpers/helpers';
 
 const signup = async (req: Request, res: Response) => {
   const { username, password } = req.body;
@@ -14,7 +14,7 @@ const signup = async (req: Request, res: Response) => {
   }
 
   try {
-    const existingUser = await getUserByUsername(username);
+    const existingUser = await getUserByIdOrUsername(username);
 
     if (existingUser) {
       return res.status(409).json({ error: 'Username already in use' });
@@ -25,7 +25,7 @@ const signup = async (req: Request, res: Response) => {
     connection.query(
       'INSERT INTO users (username, password) VALUES (?, ?)',
       [username, hashedPassword],
-      err => {
+      (err) => {
         if (err) {
           console.error('Error during registration:', err);
           return res.status(500).json({ error: 'Error during registration' });
@@ -37,8 +37,8 @@ const signup = async (req: Request, res: Response) => {
           secure: process.env.NODE_ENV === 'production',
         });
 
-        res.redirect('/home');
-      }
+        res.json({ message: 'Signup successful', username, token });
+      },
     );
   } catch (error) {
     console.error('Error during registration:', error);
@@ -56,7 +56,7 @@ const login = async (req: Request, res: Response) => {
   }
 
   try {
-    const user = await getUserByUsername(username);
+    const user = await getUserByIdOrUsername(username);
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid username or password' });
@@ -75,7 +75,7 @@ const login = async (req: Request, res: Response) => {
       secure: process.env.NODE_ENV === 'production',
     });
 
-    res.redirect('/home');
+    res.json({ message: 'Login successful', user: { username } });
   } catch (error) {
     console.error('Error during login:', error);
     res.status(500).json({ error: 'Error during login' });

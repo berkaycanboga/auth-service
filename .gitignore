@@ -1,1 +1,10 @@
-node_modules
+node_modules/
+dist/
+*.js
+coverage/
+.eslintcache/
+.jest/
+package-lock.json
+.vscode/
+.idea/
+settings.json

@@ -1,4 +1,9 @@
+import { Response, Request, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+
+interface DecodedToken {
+  username: string;
+}
 
 const createToken = (username: string): string => {
   const secretKey = process.env.JWT_SECRET || 'default-secret-key';
@@ -7,21 +12,25 @@ const createToken = (username: string): string => {
   });
 };
 
-const verifyToken = (token: string): any => {
+const verifyToken = (token: string): DecodedToken => {
   const secretKey = process.env.JWT_SECRET || 'default-secret-key';
   try {
-    const decoded = jwt.verify(token, secretKey);
+    const decoded = jwt.verify(token, secretKey) as DecodedToken;
     return decoded;
   } catch (error) {
     throw new Error('Invalid token');
   }
 };
 
-const clearToken = (res: any) => {
+const clearToken = (res: Response): void => {
   res.clearCookie('token');
 };
 
-const authenticateUser = (req: any, res: any, next: Function) => {
+const authenticateUser = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   const token = req.cookies.token;
 
   if (req.path === '/login' || req.path === '/signup') {
@@ -35,7 +44,11 @@ const authenticateUser = (req: any, res: any, next: Function) => {
   next();
 };
 
-const isAuthenticated = (req: any, res: any, next: any) => {
+const isAuthenticated = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   const token = req.cookies.token;
 
   if (req.path === '/logout') {
@@ -45,8 +58,30 @@ const isAuthenticated = (req: any, res: any, next: any) => {
   if (!token) {
     return next();
   }
+  // for test purposes this line commented out.
+  // res.redirect('/home');
+  res.json({ message: 'Logged in or Signed up successfully' });
+};
 
-  res.redirect('/home');
+const authenticateToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const decoded = verifyToken(token);
+    req.body.username = decoded.username;
+    next();
+  } catch (error) {
+    console.error('Error during token verification:', error);
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 };
 
 export {
@@ -55,4 +90,5 @@ export {
   clearToken,
   authenticateUser,
   isAuthenticated,
+  authenticateToken,
 };
